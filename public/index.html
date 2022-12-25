@@ -1,13 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso denegado</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <h1>Acceso Denegado</h1>
-    
-</body>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <title>Google sign in</title>
+  </head>
+  <body>
+    <h1>Google Sign-In</h1>
+    <div
+      id="g_id_onload"
+      data-client_id="681550940822-pu8uk5v6i229pgj1t7amsdheki868mo6.apps.googleusercontent.com"
+      data-login_uri="https://localhost:3000"
+      data-auto_prompt="false"
+      data-callback="handleCredentialResponse"
+    ></div>
+    <div
+      class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="line"
+      data-text="sign_in_with"
+      data-shape="rectangular"
+      data-logo_alignment="left"
+    ></div>
+
+
+    <div><button id="id_signOut">
+      sign Out
+    </button></div>
+
+    <script>
+      function handleCredentialResponse(response) {
+        // Google token: ID_TOKEN
+        console.log(`Gooogle Token`, response.credential);
+        const body = { id_token: response.credential };
+
+        fetch("http://localhost:3000/api/auth/google", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        })
+          .then((resp) => resp.json())
+          .then((resp) => {
+            console.log(resp);
+            localStorage.setItem('correo', resp.usuario.correo);
+          })
+          .catch(console.warn());
+      }
+
+      const button = document.getElementById('id_signOut');
+      button.onclick = () =>{
+
+        console.log(google.accounts.id);
+        google.accounts.id.disableAutoSelect();
+        google.accounts.id.revoke(localStorage.getItem('correo'), done =>{
+          localStorage.clear();
+          location.reload();
+        })
+      }
+    </script>
+  </body>
 </html>
